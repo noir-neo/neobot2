@@ -1,6 +1,6 @@
 Lita.configure do |config|
   # The name your robot will use.
-  config.robot.name = "Lita"
+  config.robot.name = "neobot"
 
   # The locale code for the language to use.
   # config.robot.locale = :en
@@ -13,11 +13,12 @@ Lita.configure do |config|
   # An array of user IDs that are considered administrators. These users
   # the ability to add and remove other users from authorization groups.
   # What is considered a user ID will change depending on which adapter you use.
-  # config.robot.admins = ["1", "2"]
+  config.robot.admins = ["noir_neo"]
 
   # The adapter you want to connect with. Make sure you've added the
   # appropriate gem to the Gemfile.
-  config.robot.adapter = :shell
+  config.robot.adapter = :slack
+  config.adapters.slack.token = ENV["SLACK_TOKEN"]
 
   ## Example: Set options for the chosen adapter.
   # config.adapter.username = "myname"
