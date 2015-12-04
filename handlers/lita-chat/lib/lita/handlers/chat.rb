@@ -1,7 +1,11 @@
 module Lita
   module Handlers
     class Chat < Handler
-      # insert handler code here
+      route(/ohayo|おはよ/i, :ohayo)
+
+      def ohayo(response)
+        response.reply("おはようございます。")
+      end
 
       Lita.register_handler(self)
     end
