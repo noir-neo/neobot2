@@ -13,7 +13,9 @@ Lita.configure do |config|
   # An array of user IDs that are considered administrators. These users
   # the ability to add and remove other users from authorization groups.
   # What is considered a user ID will change depending on which adapter you use.
-  config.robot.admins = ["noir_neo"]
+  # neobot users find noir_neo
+  # Shoma SATO (ID: U053PAMCN, Mention name: noir_neo)
+  config.robot.admins = ["U053PAMCN"]
 
   # The adapter you want to connect with. Make sure you've added the
   # appropriate gem to the Gemfile.
