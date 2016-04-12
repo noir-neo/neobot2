@@ -7,7 +7,7 @@ require 'fileutils'
 module Lita
   module Handlers
     class Gmail < Handler
-      route(/get mail/i, :mail)
+      route(/mail/i, :mail)
 
       OOB_URI = 'urn:ietf:wg:oauth:2.0:oob'
       APPLICATION_NAME = 'Gmail API Ruby Quickstart'
@@ -38,19 +38,58 @@ module Lita
         credentials
       end
 
+      def find_mail_by_id(id)
+        response = @service.get_user_message('me', id)
+
+        body = response.payload.parts ?
+          response.payload.parts.first.body.data :
+          response.payload.body.data
+        headers = response.payload.headers
+
+        {
+          subject: headers.select { |e| e.name == 'Subject'}.first.value,
+          # from: headers.select { |e| e[:name] == 'From'}.first.value,
+          date: Time.parse(headers.select { |e| e.name == 'Date'}.first.value),
+          body: body.force_encoding('utf-8'),
+        }
+      end
+
+      def find_mail(query)
+        ids = @service.list_user_messages('me', q: query)
+
+        results = []
+        ids.messages.each do |message|
+          results.push(find_mail_by_id(message.id))
+        end
+        results
+      end
+
       def mail(response)
-        # Initialize the API
-        service = Google::Apis::GmailV1::GmailService.new
-        service.client_options.application_name = APPLICATION_NAME
-        service.authorization = authorize(response)
+        @service = Google::Apis::GmailV1::GmailService.new
+        @service.client_options.application_name = APPLICATION_NAME
+        @service.authorization = authorize(response)
 
-        # Show the user's labels
-        user_id = 'me'
-        result = service.list_user_labels(user_id)
+        mails = find_mail('newer_than:1d')
 
-        response.reply "Labels:"
-        response.reply "No labels found" if result.labels.empty?
-        result.labels.each { |label| response.reply "- #{label.name}" }
+        texts = <<-EOS
+1日以内に届いたメールはこちらになります。
+        EOS
+
+        mails.each do |m|
+          texts << <<-EOS
+---
+#{m[:date]}
+#{m[:subject]}
+#{m[:body]}
+          EOS
+        end
+
+        texts << <<-EOS
+---
+以上です。
+        EOS
+
+        response.reply(texts)
       end
 
       Lita.register_handler(self)
