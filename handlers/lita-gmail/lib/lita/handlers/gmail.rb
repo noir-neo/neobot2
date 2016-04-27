@@ -7,7 +7,12 @@ require 'fileutils'
 module Lita
   module Handlers
     class Gmail < Handler
-      route(/mail/i, :mail)
+      config :query, type: String
+      config :template_header, type: String
+      config :template_footer, type: String
+
+      route(/kintai/i, :kintai)
+      route(/^code\s+(.+)/, :code)
 
       OOB_URI = 'urn:ietf:wg:oauth:2.0:oob'
       APPLICATION_NAME = 'Gmail API Ruby Quickstart'
@@ -16,7 +21,7 @@ module Lita
                                    "gmail-ruby-quickstart.yaml")
       SCOPE = Google::Apis::GmailV1::AUTH_GMAIL_READONLY
 
-      def authorize(response)
+      def authorize
         FileUtils.mkdir_p(File.dirname(CREDENTIALS_PATH))
 
         client_id = Google::Auth::ClientId.from_file(CLIENT_SECRETS_PATH)
@@ -28,26 +33,23 @@ module Lita
         if credentials.nil?
           url = authorizer.get_authorization_url(
             base_url: OOB_URI)
-          response.reply "Open the following URL in the browser and enter the " +
-               "resulting code after authorization"
-          response.reply url
-          code = gets
-          credentials = authorizer.get_and_store_credentials_from_code(
-            user_id: user_id, code: code, base_url: OOB_URI)
+          credentials = "Open the following URL in the browser and enter the " +
+               "resulting code after authorization\n#{url}"
         end
         credentials
       end
 
       def find_mail_by_id(id)
-        response = @service.get_user_message('me', id)
+        results = service.get_user_message('me', id)
 
-        body = response.payload.parts ?
-          response.payload.parts.first.body.data :
-          response.payload.body.data
-        headers = response.payload.headers
+        body = results.payload.parts ?
+          results.payload.parts.first.body.data :
+          results.payload.body.data
+        headers = results.payload.headers
 
         {
           subject: headers.select { |e| e.name == 'Subject'}.first.value,
+          # TODO: アドレスだけ抜いて名前は返したい
           # from: headers.select { |e| e[:name] == 'From'}.first.value,
           date: Time.parse(headers.select { |e| e.name == 'Date'}.first.value),
           body: body.force_encoding('utf-8'),
@@ -55,26 +57,35 @@ module Lita
       end
 
       def find_mail(query)
-        ids = @service.list_user_messages('me', q: query)
+        ids = service.list_user_messages('me', q: query)
 
-        results = []
-        ids.messages.each do |message|
-          results.push(find_mail_by_id(message.id))
+        return [] unless ids.messages
+        ids.messages.map do |message|
+          find_mail_by_id(message.id)
         end
-        results
       end
 
-      def mail(response)
-        @service = Google::Apis::GmailV1::GmailService.new
-        @service.client_options.application_name = APPLICATION_NAME
-        @service.authorization = authorize(response)
+      def service
+        if @service.nil?
+          @service = Google::Apis::GmailV1::GmailService.new
+          @service.client_options.application_name = APPLICATION_NAME
+          # FIXME: url が返ってきたときの
+          @service.authorization = authorize
+        end
+        @service
+      end
 
-        mails = find_mail('newer_than:1d')
+      def code(response)
+        code = response.matches[0][0]
+        credentials = authorizer.get_and_store_credentials_from_code(
+          user_id: user_id, code: code, base_url: OOB_URI)
+      end
 
-        texts = <<-EOS
-1日以内に届いたメールはこちらになります。
-        EOS
+      def kintai(response)
+        mails = find_mail(config.query)
 
+        texts = config.template_header
+        # FIXME: query の 'newer:#{Date.today.strftime("%Y/%m/%d")}' 意図したレスポンスにならないので、ここで今日のだけにする?
         mails.each do |m|
           texts << <<-EOS
 ---
@@ -83,11 +94,7 @@ module Lita
 #{m[:body]}
           EOS
         end
-
-        texts << <<-EOS
----
-以上です。
-        EOS
+        texts << config.template_footer
 
         response.reply(texts)
       end

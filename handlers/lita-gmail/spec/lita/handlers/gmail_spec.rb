@@ -1,11 +1,11 @@
 require "spec_helper"
 
 describe Lita::Handlers::Gmail, lita_handler: true do
-  it { is_expected.to route('mail') }
-  it { is_expected.to route('mail').to(:mail) }
+  it { is_expected.to route('kintai') }
+  it { is_expected.to route('kintai').to(:kintai) }
 
-  it '#mail' do
-    send_message('mail')
+  it '#kintai' do
+    send_message('kintai')
     expect(replies.last).not_to eq("")
   end
 end
