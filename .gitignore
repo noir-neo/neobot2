@@ -2,3 +2,7 @@
 /vendor/bundle
 
 Gemfile.lock
+*.rdb
+client_secret.json
+
+lita_config.rb
