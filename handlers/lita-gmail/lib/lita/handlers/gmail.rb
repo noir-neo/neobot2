@@ -15,10 +15,10 @@ module Lita
       route(/^code\s+(.+)/, :code)
 
       OOB_URI = 'urn:ietf:wg:oauth:2.0:oob'
-      APPLICATION_NAME = 'Gmail API Ruby Quickstart'
+      APPLICATION_NAME = 'Lita Gmail'
       CLIENT_SECRETS_PATH = 'client_secret.json'
       CREDENTIALS_PATH = File.join(Dir.home, '.credentials',
-                                   "gmail-ruby-quickstart.yaml")
+                                   "lita-gmail.yaml")
       SCOPE = Google::Apis::GmailV1::AUTH_GMAIL_READONLY
 
       def authorize
@@ -29,14 +29,7 @@ module Lita
         authorizer = Google::Auth::UserAuthorizer.new(
           client_id, SCOPE, token_store)
         user_id = 'default'
-        credentials = authorizer.get_credentials(user_id)
-        if credentials.nil?
-          url = authorizer.get_authorization_url(
-            base_url: OOB_URI)
-          credentials = "Open the following URL in the browser and enter the " +
-               "resulting code after authorization\n#{url}"
-        end
-        credentials
+        authorizer.get_credentials(user_id) || authorizer.get_authorization_url(base_url: OOB_URI)
       end
 
       def find_mail_by_id(id)
@@ -66,12 +59,15 @@ module Lita
       end
 
       def service
-        if @service.nil?
-          @service = Google::Apis::GmailV1::GmailService.new
-          @service.client_options.application_name = APPLICATION_NAME
-          # FIXME: url が返ってきたときの
-          @service.authorization = authorize
-        end
+        return @service unless @service.nil?
+
+        @service = Google::Apis::GmailV1::GmailService.new
+        @service.client_options.application_name = APPLICATION_NAME
+
+        auth = authorize
+        return auth if URI.regexp.match(auth)
+
+        @service.authorization = auth
         @service
       end
 
@@ -81,7 +77,7 @@ module Lita
           user_id: user_id, code: code, base_url: OOB_URI)
       end
 
-      def kintai(response)
+      def current_kintai
         mails = find_mail(config.query)
 
         texts = config.template_header
@@ -95,8 +91,10 @@ module Lita
           EOS
         end
         texts << config.template_footer
+      end
 
-        response.reply(texts)
+      def kintai(response)
+        response.reply(current_kintai)
       end
 
       Lita.register_handler(self)
