@@ -4,3 +4,6 @@
 Gemfile.lock
 
 lita_config.rb
+
+*.rdb
+client_secret.json
