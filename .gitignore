@@ -2,3 +2,5 @@
 /vendor/bundle
 
 Gemfile.lock
+
+lita_config.rb
