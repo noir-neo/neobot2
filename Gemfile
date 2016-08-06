@@ -10,6 +10,13 @@ gem "lita-kintai", :github => "noir-neo/lita-kintai",
                    :branch => "master"
 gem 'google-api-client'
 
+group :development, :test do
+  gem 'pry'
+  gem 'pry-doc'
+  gem 'pry-byebug'
+  gem 'pry-stack_explorer'
+end
+
 group :production do
   gem "io-console"
 end
