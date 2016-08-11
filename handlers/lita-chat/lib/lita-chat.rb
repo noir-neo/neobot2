@@ -10,3 +10,10 @@ Lita::Handlers::Chat.template_root File.expand_path(
   File.join("..", "..", "templates"),
  __FILE__
 )
+
+require "lita/handlers/onconnected"
+
+Lita::Handlers::Onconnected.template_root File.expand_path(
+  File.join("..", "..", "templates"),
+ __FILE__
+)
