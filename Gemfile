@@ -17,6 +17,3 @@ group :development, :test do
   gem 'pry-stack_explorer'
 end
 
-group :production do
-  gem "io-console"
-end
