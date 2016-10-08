@@ -33,4 +33,8 @@ Lita.configure do |config|
   ## Example: Set configuration for any loaded handlers. See the handler's
   ## documentation for options.
   # config.handlers.some_handler.some_config_key = "value"
+
+  ## For lita-kanban
+  # config.handlers.kanban.pivotal_tracker_token = 'your token'
+  # config.handlers.kanban.pivotal_tracker_project_id = 012345
 end

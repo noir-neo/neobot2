@@ -10,6 +10,8 @@ gem "lita-kintai", :github => "noir-neo/lita-kintai",
                    :branch => "master"
 gem 'google-api-client'
 
+gem 'lita-kanban'
+
 group :development, :test do
   gem 'pry'
   gem 'pry-doc'
