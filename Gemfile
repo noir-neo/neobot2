@@ -6,10 +6,7 @@ gem 'lita-cron'
 gem 'json'
 
 gem "lita-chat", path: "handlers/lita-chat"
-gem "lita-kintai", :github => "noir-neo/lita-kintai",
-                   :branch => "master"
-gem 'google-api-client'
-
+gem 'lita-kintai'
 gem 'lita-kanban'
 
 group :development, :test do
