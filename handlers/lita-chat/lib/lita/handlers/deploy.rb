@@ -1,6 +1,6 @@
 module Lita
   module Handlers
-    class Chat < Handler
+    class Deploy < Handler
       route /deploy/i, :deploy, command: true
 
       def deploy(response)
