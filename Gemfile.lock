@@ -75,7 +75,7 @@ GEM
     lita-kanban (0.1.1)
       lita (>= 4.7)
       tracker_api (~> 0.2.0)
-    lita-kintai (0.1.0)
+    lita-kintai (0.1.1)
       google-api-client
       lita (>= 4.7)
     lita-slack (1.8.0)
