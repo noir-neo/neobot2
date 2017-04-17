@@ -75,7 +75,7 @@ GEM
     lita-kanban (0.1.1)
       lita (>= 4.7)
       tracker_api (~> 0.2.0)
-    lita-kintai (0.3.0)
+    lita-kintai (0.3.1)
       google-api-client
       lita (>= 4.7)
       mail
@@ -120,7 +120,7 @@ GEM
     redis (3.3.3)
     redis-namespace (1.5.3)
       redis (~> 3.0, >= 3.0.4)
-    representable (3.0.3)
+    representable (3.0.4)
       declarative (< 0.1.0)
       declarative-option (< 0.2.0)
       uber (< 0.2.0)
